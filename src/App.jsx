@@ -57,7 +57,6 @@ function App() {
         }
       }
 
-      console.log(wordArray);
       return wordArray[0].toUpperCase();
 
     } catch (error) {
