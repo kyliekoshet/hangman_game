@@ -62,7 +62,9 @@ function App() {
 
     } catch (error) {
       console.error('Error fetching word:', error);
-      return null;
+      alert('Error fetching word. Giving you random word in english.');
+      let wordArray = ['hangman', 'error', 'fetching', 'word', "apple", "banana", "cherry", "date", "elderberry", "fig", "grape", "honeydew", "kiwi", "lemon", "mango", "nectarine", "orange", "pear", "quince", "raspberry", "strawberry", "tangerine", "watermelon"];
+      return wordArray[Math.floor(Math.random() * wordArray.length)].toUpperCase();
     }
   }
 
