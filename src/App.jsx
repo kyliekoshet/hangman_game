@@ -184,7 +184,7 @@ function App() {
           <Modal.Body>
             {hasWon 
               ? "Congratulations! You've guessed the word correctly!" 
-              : "Don't worry, you can try again with a new word!"}
+              : "You Lost! Your word was: " + word}
           </Modal.Body>
           <Modal.Footer>
             <Button variant="primary" onClick={startNewGame}>
