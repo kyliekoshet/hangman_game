@@ -41,6 +41,8 @@ function App() {
           response = await fetch('https://random-word-api.herokuapp.com/word?lang=fr');
         } else if (language === "brazilian-portuguese") {
           response = await fetch('https://random-word-api.herokuapp.com/word?lang=pt-br');
+        } else if (language === "german"){
+          response = await fetch('https://random-word-api.herokuapp.com/word?lang=de');
         } else {
           response = await fetch('https://random-word-api.herokuapp.com/word');
         }
