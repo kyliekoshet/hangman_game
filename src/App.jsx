@@ -27,43 +27,41 @@ function App() {
 
   async function fetchNewWord(language) {
     try {
-      let response;
-      let validWord = false;
-      let wordArray;
+        let response;
+        let validWord = false;
+        let wordArray;
 
-      // Keep trying until we get a valid word
-      while (!validWord) {
-        if (language === "spanish") {
-          response = await fetch('https://random-word-api.herokuapp.com/word?lang=es');
-        } else if (language === "italian") {
-          response = await fetch('https://random-word-api.herokuapp.com/word?lang=it');
-        } else if (language === "french") {
-          response = await fetch('https://random-word-api.herokuapp.com/word?lang=fr');
-        } else if (language === "brazilian-portuguese") {
-          response = await fetch('https://random-word-api.herokuapp.com/word?lang=pt-br');
-        } else {
-          response = await fetch('https://random-word-api.herokuapp.com/word');
+        // Keep trying until we get a valid word
+        while (!validWord) {
+            try {
+                if (language === "spanish") {
+                    response = await fetch('https://random-word-api.herokuapp.com/word?lang=es');
+                } else {
+                    response = await fetch('https://random-word-api.herokuapp.com/word');
+                }
+
+                wordArray = await response.json();
+
+                if (wordArray && wordArray.length > 0) {
+                    const word = wordArray[0];
+                    if (/^[a-zA-Z]+$/.test(word)) {
+                        validWord = true;
+                        return word.toUpperCase();
+                    }
+                }
+            } catch (apiError) {
+                console.warn("API fetch failed, attempting backup word bank.");
+                break; // Exit loop and use backup words
+            }
         }
-
-        wordArray = await response.json();
-        
-        if (wordArray) {
-          const word = wordArray[0];
-          if (/^[a-zA-Z]+$/.test(word)) {
-            validWord = true;
-          }
-        }
-      }
-
-      return wordArray[0].toUpperCase();
-
     } catch (error) {
-      console.error('Error fetching word:', error);
-      alert('Error fetching word. Giving you random word in english.');
-      let wordArray = ['hangman', 'error', 'fetching', 'word', "apple", "banana", "cherry", "date", "elderberry", "fig", "grape", "honeydew", "kiwi", "lemon", "mango", "nectarine", "orange", "pear", "quince", "raspberry", "strawberry", "tangerine", "watermelon"];
-      return wordArray[Math.floor(Math.random() * wordArray.length)].toUpperCase();
+        console.error('Unexpected error fetching word:', error);
     }
-  }
+    
+    alert('Error fetching word. Only English words are available.');
+    const backupWords = ["hangman", "error", "fetching", "word", "apple", "banana", "cherry", "date", "elderberry", "fig", "grape", "honeydew", "kiwi", "lemon", "mango", "nectarine", "orange", "pear", "quince", "raspberry", "strawberry", "tangerine", "watermelon"];
+    return backupWords[Math.floor(Math.random() * backupWords.length)].toUpperCase();
+}
 
   const startNewGame = async () => {
     const newWord = await fetchNewWord(language)
@@ -121,33 +119,35 @@ function App() {
         <Col>
           <h1 className='hangman-title'>Hangman</h1>
         </Col>
-        <Col className = "title-col-extras">
+        <Col className="title-col-extras">
           <div className="language-select-container">
-          <h2>Language:</h2>
-          <Form.Select onChange={(e) => setLanguage(e.target.value)}>
-            <option value="english">English</option>
-            <option value="spanish">Spanish</option>
-            <option value="italian">Italian</option>
-            <option value="german">German</option>
-            <option value="french">French</option>
-          </Form.Select>
+            <h2>Language:</h2>
+            <Form.Select onChange={(e) => {
+              setLanguage(e.target.value);
+              document.getElementById('livesLostCount').innerText = e.target.value === 'spanish' ? `Vidas Restantes: ${8 - mistakes}` : `Lives Left: ${8 - mistakes}`;
+              document.getElementById('winsCount').innerText = e.target.value === 'spanish' ? `Victorias: ${scores.wins}` : `Wins: ${scores.wins}`;
+              document.getElementById('lossesCount').innerText = e.target.value === 'spanish' ? `Derrotas: ${scores.losses}` : `Losses: ${scores.losses}`;
+            }}>
+              <option value="english">English</option>
+              <option value="spanish">Spanish</option>
+            </Form.Select>
           </div>
-          <Button className="new-game-btn" onClick={startNewGame}>New Game</Button>
+          <Button className="new-game-btn" onClick={startNewGame} id='newGameButton'>New Game</Button>
         </Col>
       </Row>
       <Row>
         <Col>
-          <h2>Lives Left: {8 - mistakes}</h2>
+          <h2 id='livesLostCount'>{language === 'spanish' ? `Vidas Restantes: ${8 - mistakes}` : `Lives Left: ${8 - mistakes}`}</h2>
         </Col>
         <Col>
-          <h2>Wins: {scores.wins}</h2>
+          <h2 id='winsCount'>{language === 'spanish' ? `Victorias: ${scores.wins}` : `Wins: ${scores.wins}`}</h2>
         </Col>
         <Col>
-          <h2>Losses: {scores.losses}</h2>
+          <h2 id='lossesCount'>{language === 'spanish' ? `Derrotas: ${scores.losses}` : `Losses: ${scores.losses}`}</h2>
         </Col>
       </Row>
       <Row className="game-row">
-        <Col >
+        <Col>
           <HangmanScene mistakes={mistakes} />
         </Col>
         <Col>
@@ -180,16 +180,16 @@ function App() {
       {isGameOver && (
         <Modal show={true} centered>
           <Modal.Header>
-            <Modal.Title>{hasWon ? "You Won! 🎉" : "You Lost! 😔"}</Modal.Title>
+            <Modal.Title>{hasWon ? (language === 'spanish' ? "¡Ganaste! 🎉" : "You Won! 🎉") : (language === 'spanish' ? "¡Perdiste! 😔" : "You Lost! 😔")}</Modal.Title>
           </Modal.Header>
           <Modal.Body>
             {hasWon 
-              ? "Congratulations! You've guessed the word correctly!" 
-              : "You Lost! Your word was: " + word}
+              ? (language === 'spanish' ? "¡Felicidades! ¡Has adivinado la palabra correctamente!" : "Congratulations! You've guessed the word correctly!") 
+              : (language === 'spanish' ? "¡Perdiste! Tu palabra era: " + word : "You Lost! Your word was: " + word)}
           </Modal.Body>
           <Modal.Footer>
             <Button variant="primary" onClick={startNewGame}>
-              {"Play Again"}
+              {language === 'spanish' ? "Jugar de nuevo" : "Play Again"}
             </Button>
           </Modal.Footer>
         </Modal>

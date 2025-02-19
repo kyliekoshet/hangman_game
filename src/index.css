@@ -66,3 +66,10 @@ button:focus-visible {
     background-color: #f9f9f9;
   }
 }
+
+
+#newGameButton {
+  background-color: #FFFF00;
+  border: 3px solid #5D4037;
+  color: #000000;
+}
